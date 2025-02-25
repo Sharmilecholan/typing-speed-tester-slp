@@ -24,30 +24,32 @@ function restartTest() {
 
 document.getElementById("typingArea").addEventListener("input", function () {
     let typedText = this.value;
-    let targetText = selectedText;
+    let targetText = selectedText || "";
     
     let feedbackHTML = ""; 
     
-    for (let i = 0; i < targetText.length; i++) { //fixed realtime highlighting
-        if (i < typedText.length) {
-            if (typedText[i] === targetText[i]) {
-                feedbackHTML += `<span style="color: green">${targetText[i]}</span>`;
-            } else {
-                feedbackHTML += `<span style="color: red">${targetText[i]}</span>`;
-            }
-        } else {
+    for (let i = 0; i < Math.max(typedText.length, targetText.length); i++) {
+        if (i >= targetText.length) {
+            // Extra characters typed
+            feedbackHTML += `<span style="color: red">${typedText[i]}</span>`;
+        } else if (i >= typedText.length) {
+            // Remaining correct text
             feedbackHTML += `<span style="color: grey">${targetText[i]}</span>`;
+        } else if (typedText[i] === targetText[i]) {
+            // Correct character
+            feedbackHTML += `<span style="color: green">${targetText[i]}</span>`;
+        } else {
+            // Incorrect character
+            feedbackHTML += `<span style="color: red">${typedText[i]}</span>`;
         }
     }
 
     document.getElementById("textToType").innerHTML = feedbackHTML;
 
-    // Check if the user has finished typing correctly
+    // Check if the user has completed the text correctly
     if (typedText === targetText) {
         endTime = performance.now();
         let timeTaken = (endTime - startTime) / 1000 / 60; // Convert milliseconds to minutes
-
-
         let words = targetText.split(/\s+/).length;
         let wpm = Math.round(words / timeTaken);
 
@@ -57,8 +59,6 @@ document.getElementById("typingArea").addEventListener("input", function () {
             document.getElementById("result").innerText = `You typed at ${wpm} words per minute!`;
         }
 
-
-        document.getElementById("typingArea").disabled = true; // Disable typing after completion
-
+        document.getElementById("typingArea").disabled = true; // Disable input after completion
     }
 });
